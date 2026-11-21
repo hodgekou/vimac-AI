@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 import CoreGraphics
+import CoreText
 @preconcurrency import ScreenCaptureKit
 import Vision
 
@@ -31,8 +32,22 @@ public enum ScreenTextDetector {
 
     /// Recognises the text in the window of `pid` whose frame is `windowFrame`.
     /// Returns nothing when that window cannot be found.
+    /// Loads the recognition models and the capture service ahead of the first real request.
+    ///
+    /// A fresh process spends several seconds on that, which is far longer than anyone keeps
+    /// hint mode open, so without this the first activations show no detected text at all.
+    public static func warmUp() async {
+        if let sample = sampleImage() {
+            _ = try? VNImageRequestHandler(cgImage: sample, options: [:]).perform([makeRequest()])
+        }
+        if hasPermission {
+            _ = try? await SCShareableContent.excludingDesktopWindows(true, onScreenWindowsOnly: true)
+        }
+    }
+
     public static func textRegions(pid: pid_t, windowFrame: CGRect) async throws -> [TextRegion] {
         let content = try await SCShareableContent.excludingDesktopWindows(true, onScreenWindowsOnly: true)
+        try Task.checkCancellation()
         guard
             let window = content.windows.first(where: {
                 $0.owningApplication?.processID == pid && isSame($0.frame, windowFrame)
@@ -49,7 +64,7 @@ public enum ScreenTextDetector {
         configuration.ignoreShadowsSingleWindow = true
 
         let image = try await SCScreenshotManager.captureImage(contentFilter: filter, configuration: configuration)
-        return try recognize(image, windowFrame: window.frame)
+        return try await recognize(image, windowFrame: window.frame)
     }
 
     /// Screen coordinates from the two APIs can differ by a fraction of a point.
@@ -58,12 +73,44 @@ public enum ScreenTextDetector {
             && abs(a.width - b.width) < 4 && abs(a.height - b.height) < 4
     }
 
-    private static func recognize(_ image: CGImage, windowFrame: CGRect) throws -> [TextRegion] {
+    private static func makeRequest() -> VNRecognizeTextRequest {
         let request = VNRecognizeTextRequest()
         request.recognitionLevel = .accurate
         request.recognitionLanguages = ["zh-Hans", "en-US"]
         request.usesLanguageCorrection = false
-        try VNImageRequestHandler(cgImage: image, options: [:]).perform([request])
+        return request
+    }
+
+    /// A small image with a few Latin and Chinese characters, enough to make Vision load its models.
+    private static func sampleImage() -> CGImage? {
+        guard
+            let context = CGContext(
+                data: nil, width: 320, height: 64, bitsPerComponent: 8, bytesPerRow: 0,
+                space: CGColorSpaceCreateDeviceGray(), bitmapInfo: CGImageAlphaInfo.none.rawValue
+            )
+        else { return nil }
+        context.setFillColor(gray: 1, alpha: 1)
+        context.fill(CGRect(x: 0, y: 0, width: 320, height: 64))
+
+        let font = CTFontCreateWithName("PingFang SC" as CFString, 30, nil)
+        let attributes = [kCTFontAttributeName: font] as CFDictionary
+        guard let text = CFAttributedStringCreate(nil, "Keyfari 键盘导航" as CFString, attributes) else { return nil }
+        context.textPosition = CGPoint(x: 12, y: 20)
+        CTLineDraw(CTLineCreateWithAttributedString(text), context)
+        return context.makeImage()
+    }
+
+    private static func recognize(_ image: CGImage, windowFrame: CGRect) async throws -> [TextRegion] {
+        // The request is only read after `perform` returns, and `cancel` is safe to call from any thread.
+        nonisolated(unsafe) let request = makeRequest()
+        try await withTaskCancellationHandler {
+            try Task.checkCancellation()
+            try VNImageRequestHandler(cgImage: image, options: [:]).perform([request])
+        } onCancel: {
+            // Leaving the mode stops recognition, so abandoned requests do not pile up and slow the next one.
+            request.cancel()
+        }
+        try Task.checkCancellation()
 
         return (request.results ?? []).compactMap { observation in
             guard let candidate = observation.topCandidates(1).first else { return nil }

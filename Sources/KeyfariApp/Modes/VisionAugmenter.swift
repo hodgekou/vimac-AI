@@ -34,6 +34,8 @@ struct VisionAugmenter: Sendable {
         let regions: [TextRegion]
         do {
             regions = try await ScreenTextDetector.textRegions(pid: pid, windowFrame: windowFrame)
+        } catch is CancellationError {
+            return []
         } catch {
             log.error("Vision detection failed: \(error.localizedDescription, privacy: .public)")
             return []

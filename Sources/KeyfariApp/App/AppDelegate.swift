@@ -3,6 +3,7 @@
 import AXKit
 import AppKit
 import KeyfariCore
+import ScreenVision
 import SwiftUI
 import os
 
@@ -44,6 +45,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillTerminate(_ notification: Notification) {
         permissionTimer?.invalidate()
+    }
+
+    /// Loads the text recognition models in the background, so the first activation does not wait for them.
+    private func warmUpTextDetection() {
+        guard store.effective.visionMode != .off else { return }
+        let log = log
+        Task.detached(priority: .utility) {
+            let started = ContinuousClock.now
+            await ScreenTextDetector.warmUp()
+            let elapsed = ContinuousClock.now - started
+            log.notice("Text detection warmed up after \(elapsed.description, privacy: .public)")
+        }
     }
 
     // MARK: Status item
@@ -184,6 +197,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         updatePermissionMenuItem(granted: true)
         modes.start()
         installDebugTrigger()
+        warmUpTextDetection()
     }
 }
 
