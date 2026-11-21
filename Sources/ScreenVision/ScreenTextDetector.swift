@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 import CoreGraphics
 @preconcurrency import ScreenCaptureKit
 import Vision
@@ -31,9 +33,11 @@ public enum ScreenTextDetector {
     /// Returns nothing when that window cannot be found.
     public static func textRegions(pid: pid_t, windowFrame: CGRect) async throws -> [TextRegion] {
         let content = try await SCShareableContent.excludingDesktopWindows(true, onScreenWindowsOnly: true)
-        guard let window = content.windows.first(where: {
-            $0.owningApplication?.processID == pid && isSame($0.frame, windowFrame)
-        }) else { return [] }
+        guard
+            let window = content.windows.first(where: {
+                $0.owningApplication?.processID == pid && isSame($0.frame, windowFrame)
+            })
+        else { return [] }
 
         let filter = SCContentFilter(desktopIndependentWindow: window)
         let scale = CGFloat(filter.pointPixelScale)

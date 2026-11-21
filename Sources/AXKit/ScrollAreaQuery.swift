@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-3.0-only
 // Derived from QueryScrollAreasService.swift in Vimac (https://github.com/nchudleigh/vimac),
 // Copyright © 2020 Dexter Leng, licensed under GPL-3.0.
 

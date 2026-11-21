@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 import CoreGraphics
 import Foundation
 
@@ -17,8 +19,6 @@ public final class EventTap {
         self.handler = handler
     }
 
-    public var isRunning: Bool { port != nil }
-
     /// Installs the tap. Returns false when the system refuses, which happens without the Accessibility permission.
     @discardableResult
     public func start() -> Bool {
@@ -32,14 +32,16 @@ public final class EventTap {
             return swallow ? nil : Unmanaged.passUnretained(event)
         }
 
-        guard let port = CGEvent.tapCreate(
-            tap: .cgSessionEventTap,
-            place: .headInsertEventTap,
-            options: .defaultTap,
-            eventsOfInterest: mask,
-            callback: callback,
-            userInfo: Unmanaged.passUnretained(self).toOpaque()
-        ) else { return false }
+        guard
+            let port = CGEvent.tapCreate(
+                tap: .cgSessionEventTap,
+                place: .headInsertEventTap,
+                options: .defaultTap,
+                eventsOfInterest: mask,
+                callback: callback,
+                userInfo: Unmanaged.passUnretained(self).toOpaque()
+            )
+        else { return false }
 
         let source = CFMachPortCreateRunLoopSource(kCFAllocatorDefault, port, 0)
         CFRunLoopAddSource(CFRunLoopGetMain(), source, .commonModes)

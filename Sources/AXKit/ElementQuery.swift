@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 import AppKit
 import ApplicationServices
-import VimacCore
+import KeyfariCore
 
 public protocol ElementQuerying: Sendable {
     /// Collects every element that should get a label.
@@ -91,8 +93,9 @@ public struct AXElementQuery: ElementQuerying {
                 kAXTitleAttribute, kAXDescriptionAttribute,
             ])
             guard let role = values[0] as? String,
-                  let frame = AXDecode.frame(position: values[1], size: values[2]),
-                  frame.width > 0, frame.height > 0 else { return nil }
+                let frame = AXDecode.frame(position: values[1], size: values[2]),
+                frame.width > 0, frame.height > 0
+            else { return nil }
             return ElementSnapshot(
                 role: role,
                 frame: frame,
@@ -106,8 +109,11 @@ public struct AXElementQuery: ElementQuerying {
 
     /// The buttons of notifications that are currently on screen.
     private static func notificationElements() throws -> [ElementSnapshot] {
-        guard let center = NSRunningApplication
-            .runningApplications(withBundleIdentifier: "com.apple.notificationcenterui").first else { return [] }
+        guard
+            let center =
+                NSRunningApplication
+                .runningApplications(withBundleIdentifier: "com.apple.notificationcenterui").first
+        else { return [] }
         let application = AXElement.application(pid: center.processIdentifier)
         application.setMessagingTimeout(seconds: 0.1)
 
@@ -117,9 +123,10 @@ public struct AXElementQuery: ElementQuerying {
             let traversal = TreeTraversal(budget: 300)
             guard let root = try traversal.visit(window, clip: nil) else { continue }
             // The process keeps windows parked off screen while nothing is shown.
-            result.append(contentsOf: traversal.hintableSnapshots(root: root, source: .notification).filter { element in
-                displays.contains { $0.intersects(element.clippedFrame) }
-            })
+            result.append(
+                contentsOf: traversal.hintableSnapshots(root: root, source: .notification).filter { element in
+                    displays.contains { $0.intersects(element.clippedFrame) }
+                })
         }
         return result
     }

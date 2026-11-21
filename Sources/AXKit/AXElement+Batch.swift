@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 import ApplicationServices
 
 extension AXElement {
@@ -14,7 +16,8 @@ extension AXElement {
         return values.map { value in
             // A failed attribute comes back as an AXValue that wraps the error code.
             if CFGetTypeID(value) == AXValueGetTypeID(),
-               AXValueGetType(unsafeDowncast(value, to: AXValue.self)) == .axError {
+                AXValueGetType(unsafeDowncast(value, to: AXValue.self)) == .axError
+            {
                 return nil
             }
             if CFGetTypeID(value) == CFNullGetTypeID() { return nil }
@@ -70,7 +73,8 @@ enum AXDecode {
 
     static func elements(_ value: CFTypeRef?) -> [AXElement] {
         guard let array = value as? [AnyObject] else { return [] }
-        return array
+        return
+            array
             .filter { CFGetTypeID($0) == AXUIElementGetTypeID() }
             .map { AXElement(unsafeDowncast($0, to: AXUIElement.self)) }
     }

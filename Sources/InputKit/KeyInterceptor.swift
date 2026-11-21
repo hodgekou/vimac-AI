@@ -1,5 +1,7 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 import CoreGraphics
-import VimacCore
+import KeyfariCore
 
 /// Swallows the keyboard while a mode is active and reports each key press.
 @MainActor

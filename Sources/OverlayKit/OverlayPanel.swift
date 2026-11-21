@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 import AppKit
 
 /// A transparent panel that covers one screen and never takes focus or mouse events.

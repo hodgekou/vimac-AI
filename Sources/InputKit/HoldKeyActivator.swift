@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 import CoreGraphics
 import Foundation
-import VimacCore
+import KeyfariCore
 
 /// Activates a mode when Space is held, without disturbing normal typing.
 @MainActor
@@ -52,7 +54,8 @@ public final class HoldKeyActivator {
         guard !SyntheticEvent.isOurs(event) else { return false }
         let stroke = KeyStroke(event: event)
 
-        let output = type == .keyDown
+        let output =
+            type == .keyDown
             ? machine.keyDown(stroke, suppressed: isSuppressed())
             : machine.keyUp(keyCode: stroke.keyCode)
 

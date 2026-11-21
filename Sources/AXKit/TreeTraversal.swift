@@ -1,9 +1,10 @@
+// SPDX-License-Identifier: GPL-3.0-only
 // The traversal strategies are derived from TraverseGenericElementService.swift and
 // TraverseSearchPredicateCompatibleWebAreaElementService.swift in Vimac
 // (https://github.com/nchudleigh/vimac), Copyright © 2020 Dexter Leng, licensed under GPL-3.0.
 
 import ApplicationServices
-import VimacCore
+import KeyfariCore
 
 /// Walks the accessibility tree below one root and records every visible node.
 final class TreeTraversal {
@@ -48,7 +49,8 @@ final class TreeTraversal {
 
         let values = element.values(of: Self.attributes)
         guard let role = values[0] as? String,
-              let frame = AXDecode.frame(position: values[1], size: values[2]) else { return nil }
+            let frame = AXDecode.frame(position: values[1], size: values[2])
+        else { return nil }
 
         let clipped: CGRect
         if let clip {
@@ -59,13 +61,14 @@ final class TreeTraversal {
         }
 
         let index = nodes.count
-        nodes.append(Node(
-            role: role,
-            frame: frame,
-            clippedFrame: clipped,
-            actions: element.actionNames(),
-            searchText: AXDecode.searchText([values[3], values[4], values[5]])
-        ))
+        nodes.append(
+            Node(
+                role: role,
+                frame: frame,
+                clippedFrame: clipped,
+                actions: element.actionNames(),
+                searchText: AXDecode.searchText([values[3], values[4], values[5]])
+            ))
 
         if role == "AXWebArea", element.parameterizedAttributeNames().contains(Self.searchPredicateAttribute) {
             // Browsers answer one search far faster than a node-by-node walk, and walking
@@ -97,16 +100,18 @@ final class TreeTraversal {
 
         let values = element.values(of: Array(Self.attributes.prefix(6)))
         guard let role = values[0] as? String,
-              let frame = AXDecode.frame(position: values[1], size: values[2]),
-              clip.intersects(frame) else { return nil }
+            let frame = AXDecode.frame(position: values[1], size: values[2]),
+            clip.intersects(frame)
+        else { return nil }
 
-        nodes.append(Node(
-            role: role,
-            frame: frame,
-            clippedFrame: clip.intersection(frame),
-            actions: element.actionNames(),
-            searchText: AXDecode.searchText([values[3], values[4], values[5]])
-        ))
+        nodes.append(
+            Node(
+                role: role,
+                frame: frame,
+                clippedFrame: clip.intersection(frame),
+                actions: element.actionNames(),
+                searchText: AXDecode.searchText([values[3], values[4], values[5]])
+            ))
         return nodes.count - 1
     }
 

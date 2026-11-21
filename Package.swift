@@ -1,29 +1,30 @@
 // swift-tools-version: 6.0
+// SPDX-License-Identifier: GPL-3.0-only
 
 import PackageDescription
 
 let package = Package(
-    name: "Vimac-AI",
+    name: "Keyfari",
     platforms: [.macOS(.v14)],
     products: [
-        .executable(name: "Vimac-AI", targets: ["VimacApp"]),
+        .executable(name: "Keyfari", targets: ["KeyfariApp"])
     ],
     targets: [
         // Pure logic. Depends on Foundation only so it can be tested without any permission.
-        .target(name: "VimacCore"),
+        .target(name: "KeyfariCore"),
         // Accessibility (AXUIElement) access.
-        .target(name: "AXKit", dependencies: ["VimacCore"]),
+        .target(name: "AXKit", dependencies: ["KeyfariCore"]),
         // Event taps, activators, synthesized mouse and scroll events.
-        .target(name: "InputKit", dependencies: ["VimacCore"]),
+        .target(name: "InputKit", dependencies: ["KeyfariCore"]),
         // Transparent per-screen panels that draw hints and borders.
-        .target(name: "OverlayKit", dependencies: ["VimacCore"]),
+        .target(name: "OverlayKit", dependencies: ["KeyfariCore"]),
         // On-device recognition of text that the accessibility tree does not expose.
         .target(name: "ScreenVision"),
         .executableTarget(
-            name: "VimacApp",
-            dependencies: ["VimacCore", "AXKit", "InputKit", "OverlayKit", "ScreenVision"]
+            name: "KeyfariApp",
+            dependencies: ["KeyfariCore", "AXKit", "InputKit", "OverlayKit", "ScreenVision"]
         ),
-        .testTarget(name: "VimacCoreTests", dependencies: ["VimacCore"]),
+        .testTarget(name: "KeyfariCoreTests", dependencies: ["KeyfariCore"]),
     ],
     swiftLanguageModes: [.v6]
 )

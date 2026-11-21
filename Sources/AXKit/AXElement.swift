@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 import ApplicationServices
 
 /// An accessibility call failed with an error other than "no value".
@@ -56,7 +58,8 @@ public struct AXElement: @unchecked Sendable, Hashable {
 
     public func element(of attribute: String) throws -> AXElement? {
         guard let value = try value(of: attribute),
-              CFGetTypeID(value) == AXUIElementGetTypeID() else { return nil }
+            CFGetTypeID(value) == AXUIElementGetTypeID()
+        else { return nil }
         return AXElement(unsafeDowncast(value, to: AXUIElement.self))
     }
 

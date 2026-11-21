@@ -1,6 +1,8 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 import CoreGraphics
 import Foundation
-import VimacCore
+import KeyfariCore
 
 /// Activates a mode when a short sequence such as "fd" is typed.
 @MainActor

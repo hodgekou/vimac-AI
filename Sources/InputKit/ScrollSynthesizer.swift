@@ -1,9 +1,10 @@
+// SPDX-License-Identifier: GPL-3.0-only
 // Derived from ChunkyScroller.swift in Vimac (https://github.com/nchudleigh/vimac),
 // Copyright © 2020 Dexter Leng, licensed under GPL-3.0.
 
 import CoreGraphics
 import Foundation
-import VimacCore
+import KeyfariCore
 
 /// Posts pixel-precise scroll wheel events. They land on whatever is under the cursor.
 @MainActor

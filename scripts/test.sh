@@ -1,4 +1,5 @@
 #!/bin/bash
+# SPDX-License-Identifier: GPL-3.0-only
 # Runs the unit tests.
 #
 # With only the Command Line Tools installed, the Swift Testing macro plugin is on disk

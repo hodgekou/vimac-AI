@@ -1,8 +1,9 @@
+// SPDX-License-Identifier: GPL-3.0-only
 // Derived from Utils.swift in Vimac (https://github.com/nchudleigh/vimac),
 // Copyright © 2019 Dexter Leng, licensed under GPL-3.0.
 
 import CoreGraphics
-import VimacCore
+import KeyfariCore
 
 /// Posts synthesized mouse events. Points use accessibility coordinates,
 /// which are the coordinates Quartz events use.
@@ -34,7 +35,8 @@ public enum MouseSynthesizer {
     }
 
     private static func click(_ button: CGMouseButton, at point: CGPoint, clickState: Int64, flags: CGEventFlags) {
-        let (down, up): (CGEventType, CGEventType) = button == .right
+        let (down, up): (CGEventType, CGEventType) =
+            button == .right
             ? (.rightMouseDown, .rightMouseUp)
             : (.leftMouseDown, .leftMouseUp)
         post(down, button: button, at: point, clickState: clickState, flags: flags)

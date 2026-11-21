@@ -1,5 +1,7 @@
+// SPDX-License-Identifier: GPL-3.0-only
+
 import Carbon.HIToolbox
-import VimacCore
+import KeyfariCore
 
 /// System-wide keyboard shortcuts registered through the Carbon hot key API.
 @MainActor
@@ -22,7 +24,7 @@ public final class GlobalHotkeys {
         let status = RegisterEventHotKey(
             UInt32(keyCode),
             Self.carbonFlags(modifiers),
-            EventHotKeyID(signature: 0x564D_4143 /* 'VMAC' */, id: id),
+            EventHotKeyID(signature: 0x4B46_5249 /* 'KFRI' */, id: id),
             GetEventDispatcherTarget(),
             0,
             &reference
