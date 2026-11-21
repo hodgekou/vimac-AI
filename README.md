@@ -4,6 +4,23 @@ Keyboard-driven navigation for macOS. Press a shortcut, and every button, link a
 
 Keyfari is a rewrite of [Vimac](https://github.com/nchudleigh/vimac) by Dexter Leng, which stopped receiving code changes in April 2021. It is not affiliated with Vimac or its author.
 
+## Text detection
+
+Some windows expose little or nothing to the accessibility tree: canvas-drawn interfaces, games, remote desktops, pictures of an interface. Keyfari can read the window's pixels with Apple's Vision framework, on the device, and label the text it finds.
+
+Both screenshots show hint mode in the same window. The window is Preview displaying a picture of a made-up application, so everything inside it is only pixels.
+
+| Without text detection | With text detection |
+| --- | --- |
+| ![Hint mode without text detection: only Preview's own toolbar has labels](docs/images/hints-without-text-detection.png) | ![Hint mode with text detection: every piece of text in the picture has a label](docs/images/hints-with-text-detection.png) |
+| Only Preview's toolbar, which is real interface, gets labels. | The buttons and entries in the picture get labels too. |
+
+The regular labels appear at once; the detected ones follow in well under a second. Detection finds text, not icons, so a button with no text still goes without a label.
+
+## Settings
+
+![The Hints pane of the settings window, with a live preview of the labels](docs/images/settings.png)
+
 ## Features
 
 - **Hint mode** (`⌘⇧Space`): labels on every clickable element of the focused window, the menu bar, menu bar extras and notifications. Type a label to click. Hold `Shift` on the last letter for a right click, `Command` for a double click, `Control` for a command-click, `Option` to only move the cursor. `Delete` removes a letter, `Space` flips overlapping labels, `Esc` leaves.
